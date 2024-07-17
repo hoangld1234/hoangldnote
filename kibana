@@ -1,0 +1,83 @@
+\\107.120.94.248 Abc13579
+lab:
+	192.168.56.101 192.168.56.102
+
+elastic/Hoangle85$
+grep -Ev '^#|^$' /etc/kibana/kibana.yml
+
+pass user elastic: Barca2024$
+export ELASTIC_PASSWORD=Barca2024$
+Lưu ý cài đặt elk và kibana phải cùng cả minorversion 
+Thuật ngữ:
+	- proof of concept: mang tính chất phát hiện
+	- active response: khi phát hiện có hành động xử lý
+	- file /var/ossec/etc/ossec.conf trên wazuh srv để chỉ thị endpoint hành động (chạy script,lệnh..)
+	- file /var/ossec/etc/ossec.conf trên wazuh agent để theo dõi file,tiến trình, báo cáo về srv 
+	- file /var/ossec/etc/rules/local_rules.xml trên wazuh srv thường để detect theo mẫu (câu lệnh, process..)sau đó xuất cảnh báo, thông báo ra dashboard
+VD về vulnerability detect: ta detect lỗ hổng backdoor CVE-2024-3094 trên linux cho phép attacker sủ dụng sshd để mở execution code:
+	- cấu hình etc/ossec.conf trên endpoint detect sshd mở tiến trình con và xuất thông báo "sshd child process"
+	- cấu hình etc/rules/local_rules trên srv wazuh match thông báo "sshd child process" với ruleid custom
+	- chạy đoạn script trên 1 máy dùng tấn công để kiểm tra wazuh có detect đúng không
+Sau khi cài đặt xong có thể đổi pass của user elastic trong webgui của kibana sau đó sử dụng pass đó để login và check version của elk, cấu hình logstash gửi log cho elk
+root@elk:~# curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200
+Reset the password of the elastic built-in superuser with: '/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+cài đặt toàn bộ wazuh indexer, dashboard và server trên 1 vm: 
+	curl -sO https://packages.wazuh.com/4.8/wazuh-install.sh && curl -sO https://packages.wazuh.com/4.8/config.yml && bash wazuh-install.sh -a
+	->cài xong chú ý copy lại password admin (3*p1mqo0a5XKt.WHzLvgwcJchgxVK153)
+*copy public key của elk sang srv logstash để trust kết nối và ssl: public key trong thư mục /etc/elasticsearch/certs/http_ca.crt, copy vào /etc/logstash/elasticsearch-certs/ trong srv logstash
+cấu hình keystore logstash:
+	sudo -E /usr/share/logstash/bin/logstash-keystore --path.settings /etc/logstash add ELASTICSEARCH_USERNAME (nhập elastic)
+	sudo -E /usr/share/logstash/bin/logstash-keystore --path.settings /etc/logstash add ELASTICSEARCH_PASSWORD  (nhập Barca2024$)
+	
+*Xem dữ liệu log của logstash:tail -f /var/ossec/logs/alerts/alerts.json (là file lưu dữ liệu log của logstash nhận đc từ các host)
+file alert ra dashboard trên wazuh server: nano /var/ossec/etc/rules/local_rules.xml
+file cấu hình cho logstash trong /etc/logstash/conf.d/wazuh-elasticsearch.conf
+input {
+  file {
+    id => "wazuh_alerts"
+    codec => "json"
+    start_position => "beginning"
+    stat_interval => "1 second"
+    path => "/var/ossec/logs/alerts/alerts.json"
+    mode => "tail"
+    ecs_compatibility => "disabled"
+  }
+}
+
+output {
+    elasticsearch {
+         hosts => "https://192.168.56.104:9200"
+         index  => "wazuh-alerts-4.x-%{+YYYY.MM.dd}"
+         #user => 'elastic'
+         #password => 'Barca2024$'
+         user => '${ELASTICSEARCH_USERNAME}'
+         password => '${ELASTICSEARCH_PASSWORD}'
+	 ssl => true
+         ssl_certificate_verification => true
+	 cacert => "/etc/logstash/elasticsearch-certs/root-ca.pem"
+         template => "/etc/logstash/templates/wazuh.json"
+         template_name => "wazuh"
+         template_overwrite => true
+    }
+}
+Nếu muốn chạy debug logstash thì thay cụm output bằng
+output {
+    stdout {
+    codec => rubydebug {
+      metadata => true # This makes the logs to appear in console
+     }
+    }
+}
+	sau đó stop logstash và chạy lệnh: sudo -E /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/wazuh-elasticsearch.conf | grep '"id" => "550"' -A 20 (lọc rule id 550 có được output từ logstash ra elk)
+test config va ketnoi toi elk: 
+	sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash/ -t -f /etc/logstash/conf.d/wazuh-elasticsearch.conf
+	sudo -E /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/wazuh-elasticsearch.conf --path.settings /etc/logstash/
+capture packet từ logstash tới elk:	tcpdump -n -i enp0s8 tcp port 9200 and host 192.168.56.120
+KHI LOGSTASH STOP THÌ SAU KHI START LẠI NÓ SẼ GỬI LOG TRONG TG BỊ STOP SANG ELK, KIBANA SẼ THỂ HIỆN LOG ĐÓ VỚI TIMESTAMP LÀ LÚC LOGSTASH START LẠI
+Filter trong discover của elk:
+	filter brute force bằng ssh: rule.description :"sshd: brute force trying to get access to the system. Authentication failed." 
+	filter brute force chung: rule.mitre.technique :"Brute Force"
+*Mở khóa xpack.encryptedSavedObjects.encryptionKey để tạo alert trong kibana: vào thư mục /usr/share/kibana/bin chạy ./kibana-encryption-keys để sinh ra
+chuỗi key, chạy ./kibana-keystore để create và store key xpack.encryptedSavedObjects.encryptionKey->restart kibana->vào discover, alert sẽ không còn yc encryptionKey nữa
+Muốn hiện alert khi khớp rules trong management/stack manage thì sau khi set rules xong chuyển notify về snooze indefine(quả chuông đỏ)->query: kibana.alert.status : "active" 
+
