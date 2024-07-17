@@ -11,3 +11,23 @@ CCNP:
 	do nếu dùng int physic có thể k chuẩn nếu nối qua modem ISP và đường đó vẫn sống nhưng thực tế kết nối phía ISP với internet đã chết
 	- HSRP mặc định prio là 100, để cho phép bầu active lại khi có tbi prio cao hơn xuất hiện cần phải thêm preempt vào router passive, với VRRP preempt enable mặc định
 	- ip sla có 3 giá trị freq(khoảng tg giữa 2 lần ping) phải > timeout (sau khi ping chờ bao lâu) phải > threshold (bao nhiêu lâu quyết định là down)
+Checkpoint:
+	checkpoint không có zone như các fw khác
+	3 component chính của checkpoint: 
+		- gateway: để cấu hình nat, policy, route, NAT.. trên đó
+		- secure manager: kết nối với gw qua SIC, để cấu hình các giao thức routing, update, cấu hình chung cho fw, quản lý cấu hình..
+		- smart control(sc): chính là gaia portal(GUI web của checkpoint)
+	Các phg thức triển khai checkpoint:
+		- Distributed: triển khai 1 manager-1 gateway riêng
+		- Hybrid: triển khai 1 manager- nhiều gateway
+		- Standalone: triển khai 1 manager và 1 gw chung, phù hợp doanh nghiệp SME
+	Activation key: là key để gateway bắt tay với manager chứ k phải là key active checkpoint gateway trong quá trình config ban đầu
+	activation key đc user tạo ra khi cài gw và nhập vào manager khi add gw
+	Ta có thể cài manager và gw riêng nhưng cùng subnet NAT trên vmware, sau đó cài smart console kết nối với manager và add gw vào để tương tác
+	Khi sử dụng smart console để cấu hình, sau khi xong ta bấm publish để save trong smart console và install để save vào gw
+Palo:
+	- SSL forward proxy: tính năng cho phép palo rà soát cert trên web https và cảnh báo user nếu cert đó k tin tưởng, ta sẽ tạo 1 cert đc trust trên fw được tạo ra từ 1 CA server local,
+	tạo 1 cert unstrust k cần sign bởi ca server, sau đó tạo profile ssl forward proxy và add vào 1 policy, khi kiểm tra cert web https ok palo sẽ gán trust cert vào, nếu k ok sẽ gán cert untrust và cảnh báo người dùng
+	- Virtual routers (VR) chính là 1 router ảo để cấu hình các route riêng, ta có thể tạo int loopback, cấu hình các giao thức routing tĩnh và động, kết nối với các VR khác.
+	- Một interface physic k thể add vào 2 virtual routers (VR), nhưng sub inter thì được.
+	- virtual wire: để khi đặt fw nằm giữa các kết nối mạng giữa switch có sẵn nó cho phép fw bình thg mà không phải cấu hình lại nhg vẫn kiểm soát được traffic
