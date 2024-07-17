@@ -1,0 +1,13 @@
+CCNP:
+	- bpdufilter: để sw k gửi gói tin bpdu ra nữa, dùng cho các sw ở layer dưới kết nối lên layer trên
+	- bpduguard: để sw kết nối với các khu vực chắc chắn k phát sinh bpdu packet block khi nhận đc gói bpdu đề phòng loop mạng
+	- mst: chống loop nhưng cấu hình theo profile và add các vlan vào để  không phải cấu hình nhiều lần trên mỗi vlan
+	- mst: switch làm root không nhất thiết là primary srv, ta có thể thiết lập profile 1 chứa vlan chắn với sw primary làm root, pro 2 chứa vlan lẻ với sw secondary srv làm root
+		SW1: Span mst 1 prio 0, span mst 2 prio 4096; SW2: Span mst 1 prio 4096, span mst 2 prio 0
+	- giảm thời gian gửi lacp packet để remove link down nhanh (3s, nếu mặc định là 90s): lacp rate fast
+	- để DHCP cấp đúng ip động đúng subnet của client nó dựa vào thông tin ip helper trùng với gw vlan thuộc pool dùng cho vlan đó
+	- switch forward bản tin request ip bằng câu lệnh ip helper trong int vlan tương ứng với vlan của client trên switch
+	- track có 2 kiểu là track interface, track ip sla, để track kết nối internet thg dùng track ip sla
+	do nếu dùng int physic có thể k chuẩn nếu nối qua modem ISP và đường đó vẫn sống nhưng thực tế kết nối phía ISP với internet đã chết
+	- HSRP mặc định prio là 100, để cho phép bầu active lại khi có tbi prio cao hơn xuất hiện cần phải thêm preempt vào router passive, với VRRP preempt enable mặc định
+	- ip sla có 3 giá trị freq(khoảng tg giữa 2 lần ping) phải > timeout (sau khi ping chờ bao lâu) phải > threshold (bao nhiêu lâu quyết định là down)
