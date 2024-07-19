@@ -1,12 +1,3 @@
-\\107.120.94.248 Abc13579
-lab:
-	192.168.56.101 192.168.56.102
-
-elastic/Hoangle85$
-grep -Ev '^#|^$' /etc/kibana/kibana.yml
-
-pass user elastic: Barca2024$
-export ELASTIC_PASSWORD=Barca2024$
 Lưu ý cài đặt elk và kibana phải cùng cả minorversion 
 Thuật ngữ:
 	- proof of concept: mang tính chất phát hiện
@@ -23,7 +14,7 @@ root@elk:~# curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic:$ELAST
 Reset the password of the elastic built-in superuser with: '/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
 cài đặt toàn bộ wazuh indexer, dashboard và server trên 1 vm: 
 	curl -sO https://packages.wazuh.com/4.8/wazuh-install.sh && curl -sO https://packages.wazuh.com/4.8/config.yml && bash wazuh-install.sh -a
-	->cài xong chú ý copy lại password admin (3*p1mqo0a5XKt.WHzLvgwcJchgxVK153)
+	->cài xong chú ý copy lại password admin (lFyTlyPdzYigOvO4.3cAHVoAd*ZgotVP)
 *copy public key của elk sang srv logstash để trust kết nối và ssl: public key trong thư mục /etc/elasticsearch/certs/http_ca.crt, copy vào /etc/logstash/elasticsearch-certs/ trong srv logstash
 cấu hình keystore logstash:
 	sudo -E /usr/share/logstash/bin/logstash-keystore --path.settings /etc/logstash add ELASTICSEARCH_USERNAME (nhập elastic)
@@ -70,14 +61,15 @@ output {
 }
 	sau đó stop logstash và chạy lệnh: sudo -E /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/wazuh-elasticsearch.conf | grep '"id" => "550"' -A 20 (lọc rule id 550 có được output từ logstash ra elk)
 test config va ketnoi toi elk: 
-	sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash/ -t -f /etc/logstash/conf.d/wazuh-elasticsearch.conf
-	sudo -E /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/wazuh-elasticsearch.conf --path.settings /etc/logstash/
+	stop logstash->sudo -E /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/wazuh-elasticsearch.conf --path.settings /etc/logstash/
 capture packet từ logstash tới elk:	tcpdump -n -i enp0s8 tcp port 9200 and host 192.168.56.120
 KHI LOGSTASH STOP THÌ SAU KHI START LẠI NÓ SẼ GỬI LOG TRONG TG BỊ STOP SANG ELK, KIBANA SẼ THỂ HIỆN LOG ĐÓ VỚI TIMESTAMP LÀ LÚC LOGSTASH START LẠI
 Filter trong discover của elk:
 	filter brute force bằng ssh: rule.description :"sshd: brute force trying to get access to the system. Authentication failed." 
 	filter brute force chung: rule.mitre.technique :"Brute Force"
 *Mở khóa xpack.encryptedSavedObjects.encryptionKey để tạo alert trong kibana: vào thư mục /usr/share/kibana/bin chạy ./kibana-encryption-keys để sinh ra
-chuỗi key, chạy ./kibana-keystore để create và store key xpack.encryptedSavedObjects.encryptionKey->restart kibana->vào discover, alert sẽ không còn yc encryptionKey nữa
+chuỗi key, chạy ./kibana-keystore để create và add value cho key xpack.encryptedSavedObjects.encryptionKey->restart kibana->vào discover, alert sẽ không còn yc encryptionKey nữa
 Muốn hiện alert khi khớp rules trong management/stack manage thì sau khi set rules xong chuyển notify về snooze indefine(quả chuông đỏ)->query: kibana.alert.status : "active" 
-
+Query bằng ngôn ngữ KQL trong tab Discover:
+	- Match các rule bắt đầu bằng 100: rule.id : 100*
+	- Match các rule bắt đầu bằng Warning: rule.description : Warning*
