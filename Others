@@ -1,0 +1,14 @@
+nic ring buffer: 4096 trong thư mục /etc/u.dev/ của ubuntu 22
+Database:
+	- Các mô hình database là base và acid để tương tác giữa transaction và database, acid phù hợp cho các loại db sql như maria, oracle, base phù hợp cho các loại db nonsql như redis, mongo
+	- db dạng sql phù hợp với các ứng dụng có cấu trúc như tài chính, dạng nonsql phù hợp với các ứng dụng phi cấu trúc như marketing
+	- Sự khác nhau giữa myisam và innodb:
+		- myisam: 
+			+ k0 hỗ trợ model ACID, lock toàn bộ table khi có write, k support foreign key, hỗ trợ full text search, không hỗ trợ tự recovery sau khi crash
+			+ phù hợp với ứng dụng read nhiều, ứng dụng nhỏ
+		- innodb:
+			+ hỗ trợ model ACID, k lock toàn table khi write mà chỉ lock row, hỗ trợ foreign key, fulltext search, tự recovery được
+			+ phủ hợp với ứng dụng đòi hỏi đọc ghi đồng thời 
+Link down:
+  - os cisco: https://cnttshop.vn/blogs/cong-cu-labs/huong-dan-add-cisco-iol-vao-pnetlab-de-gia-lap-switch-router-cisco, tigernet.com.vn: 5003(Free/Tigernet)
+  
