@@ -1,0 +1,56 @@
+Ci: configuration item tức là loại server (OS, DBMS, Maxigent..)
+SQL tuning:
+	- Lock gây chiếm dụng tài nguyên cao->phải kill. Deadlock là 2 session cùng lock 1 table, DB sẽ tự rà và kill (VD như oracle có Pmon)
+	- session ID trong DB sẽ sinh ra process trên OS->kill session trg DB ko đc thì kill process trong OS->kill session trg DB
+	sẽ đảm bảo an toàn cho dữ liệu trong DB mặc dù mất thời gian, hãn hữu mới kill process
+	- metric quan trọng nhất của db là query response time/execution time
+	- có các câu lệnh để tìm các query có cpu_time và query response time cao->tập trung xử lý các query đó để giảm tải cpu, tăng số tps
+	- sử dụng index để đưa vào điều kiện khi truy vấn, để tạo index cần sử dụng function based index, dùng function based index nhiều ảnh hưởng đến perform db
+	- index nên đặt ở cột có tính phân biệt cao
+
+IOPS:
+	- thời gian từ lúc CAB review cho SR tới execution(thực hiện) cách nhau tối thiểu 24h
+	- SR standard, simple, onecall khi nào dùng?
+Failure Process:
+	- Báo cáo trong vòng 30p cho PM khi có event, xử lý trong vòng 120 phút
+Process audit(PA)
+	- là việc kiểm tra việc tuân thủ quy trình, quá trình như sau: qa sẽ xuất lịch sử tháng trước vào đầu tháng->kiểm tra toàn bộ SR->gửi cho vận hành->
+	bp vận hành phản hồi lý do ngoại lệ->qa đánh giá và trả lời lý do
+	- các hạng mục kiểm tra bao gồm: sr(tuân thủ về sr), change mgmt(tuân thủ kế hoạch thay đổi, họp cab), incident mgmt(xử lý lỗi), configuration mgmt(thông tin cấu hình đầy đủ k)
+	- xử lý fault theo nhóm từ 2 người trở lên cần điền đầy đủ tên của mọi người
+	- Một số hạng mục change mgmt cấm thao tác trong cùng ngày->nếu pa kiểm tra thực hiện trong thời gian 24h sẽ fail và trừ điểm
+	- Một số change mgmt cấm thao tác trong giờ làm việc của khách hàng (7-18h) trừ trường hợp có lý do chính đáng và phải có bằng chứng
+Phòng chống lỗi_failure prevention 2:
+	- Lệnh lvreduce để giảm dung lượng lv chỉ có thể được thực hiện nếu chưa chạy xfsgrow
+	- strip size của file system cần phải giống nhau để k bị lỗi file system
+	- vgcfgrestore
+	- redo log file bị corrupt do db shutdown không đúng cách-> k tự tiện xóa redo log file bằng tay->thực hiện theo các bước sau: chuyển db sang chế độ noarchivelog->
+	drop redo log file-> chuyển db sang archivelog mode->add lại redo log file
+	- Không nên tùy tiện xóa file db từ trong OS
+DC security:
+	- Maxigent agent sẽ collect kết quả security trên srv
+	- Security check cần phải hoàn thành trươc 30 hàng tháng
+SPI-chỉ số đánh giá hiệu quả làm việc trong 1 tháng
+	- Chỉ số hoạt động srv: tổng số h srv online trong tháng/ tổng số h trong tháng
+	- tỷ lệ xử lý 100% đúng hạn trong tháng
+	- thời gian xử lý event critical trong vòng 24h, k tính thứ 7, cn và nghỉ lễ
+	- Thời gian xử lý fatal là trong 2h, sẽ có người gọi điện nếu vào ban đêm
+EAMS-web gui để remote srv và giám sát các hành động trên window bằng video, câu lệnh trên linux = log
+	- để vào đc cần phải xin acc và ip access (để vào srv)
+	- muốn upload file lên eams thì cần cài certificate và dơmain
+	- đăng nhập eams bằng user nào thì chỉ được tải file từ folder được phân quyền, muốn down từ thư mục khác thì sudo sang root
+	- có thể xem lại câu lệnh đã làm với từng user trong tab my history
+	- xem lịch sử truy cập của các user trong tab access audit
+ỉnfra accessment:
+	- lookin: ựng dụng đánh giá os theo các trải nghiệm của ss sds
+	- Các hệ thống nginx, chatbot, k8s không dùng swap->có thể pass đc accessment
+event mgmt:
+	- incident có 2 loại: standard và simple. standard là incident có khả năng ảnh hưởng tới dịch vụ của KH. còn lại sẽ xếp vào dạng onecall hoặc simple
+IOPS intro:
+	- srv được xếp hạng gold, silver, bronze. các srv bronze là các srv cho dev
+	- SOP là file kế hoạch thực hiện, bao gồm thời gian, các bước thực hiện, rollback
+standard process manual SPM: là quy trình cho từng công việc vận hành VD như quản lý problem/incident/failure, quản lý event, cấu hình, availability, continity
+	
+	
+	
+	
