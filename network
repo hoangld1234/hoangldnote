@@ -12,6 +12,15 @@ CCNP:
 	- HSRP mặc định prio là 100, để cho phép bầu active lại khi có tbi prio cao hơn xuất hiện cần phải thêm preempt vào router passive, với VRRP preempt enable mặc định
 	- ip sla có 3 giá trị freq(khoảng tg giữa 2 lần ping) phải > timeout (sau khi ping chờ bao lâu) phải > threshold (bao nhiêu lâu quyết định là down)
 Checkpoint:
+	Ưu điểm:
+		- Chuẩn bị sẵn cho việc quản lý tập trung nhiều SGW (security GW)
+		- FW ít lỗ hổng
+		- Cho phép quản lý policy cho từng SGW bằng cách chia tab
+	Nhược điểm:
+		- kiến trúc hơi khác biệt khi chia ra management server(quản lý policy, kết nối smart console..) và SGW(quản lý route, nat..)
+		- sinh ra nhiều loại sao lưu phức tạp
+		- để lưu cấu hình phải bấm publish-install, quá trình lưu hơi lâu
+		- Ko tiện lợi như Fortinet trong việc cấu hình, vd như cấu hình policy k có tích NAT mà phải cấu hình NAT riêng
 	checkpoint không có zone như các fw khác
 	3 component chính của checkpoint: 
 		- gateway: để cấu hình nat, policy, route, NAT.. trên đó
@@ -24,10 +33,21 @@ Checkpoint:
 	Activation key: là key để gateway bắt tay với manager chứ k phải là key active checkpoint gateway trong quá trình config ban đầu
 	activation key đc user tạo ra khi cài gw và nhập vào manager khi add gw
 	Ta có thể cài manager và gw riêng nhưng cùng subnet NAT trên vmware, sau đó cài smart console kết nối với manager và add gw vào để tương tác
-	Khi sử dụng smart console để cấu hình, sau khi xong ta bấm publish để save trong smart console và install để save vào gw
+	Khi sử dụng smart console để cấu hình, sau khi xong ta bấm publish để save trong smart console và install để save vào gw->có thể bấm install luôn để publish và install cùng lúc
+	Việc cấu hình policy cho các SGW khác nhau ta tạo các tab trong smartconsole cho dễ quản lý, các policies tương đồng có thể nhóm thành các section
+	Muốn kết nối internet cần cấu hình trên inter đc NAT ra internet của SGW = override->internet(external)
+	Sao lưu:
+		- revision: thực hiện sao lưu policy trong smart console, dung lượng r nhỏ
+		- backup: sao lưu config OS và route trong SGW, dung lượng r nhỏ
+		- image: sao lưu toàn bộ OS và db, dung lượng hàng GB
 Palo:
+	Ưu điểm:
+		- Kiến trúc tập trung trong 1 FW chứ k chia ra manage và SGW như checkpoint
+		- Có virtual routers quản lý  
+	Nhược điểm:
 	- SSL forward proxy: tính năng cho phép palo rà soát cert trên web https và cảnh báo user nếu cert đó k tin tưởng, ta sẽ tạo 1 cert đc trust trên fw được tạo ra từ 1 CA server local,
 	tạo 1 cert unstrust k cần sign bởi ca server, sau đó tạo profile ssl forward proxy và add vào 1 policy, khi kiểm tra cert web https ok palo sẽ gán trust cert vào, nếu k ok sẽ gán cert untrust và cảnh báo người dùng
 	- Virtual routers (VR) chính là 1 router ảo để cấu hình các route riêng, ta có thể tạo int loopback, cấu hình các giao thức routing tĩnh và động, kết nối với các VR khác.
 	- Một interface physic k thể add vào 2 virtual routers (VR), nhưng sub inter thì được.
 	- virtual wire: để khi đặt fw nằm giữa các kết nối mạng giữa switch có sẵn nó cho phép fw bình thg mà không phải cấu hình lại nhg vẫn kiểm soát được traffic
+	- Ko tiện lợi như Fortinet trong việc cấu hình, vd như cấu hình policy k có tích NAT mà phải cấu hình NAT riêng
