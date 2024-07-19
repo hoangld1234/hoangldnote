@@ -1,3 +1,6 @@
+Link tham khảo:
+	- tạo detection rule trong item security (không hay bằng rule trong mục stack mgmt, tạo security rule xong thì các rule trg stack mgmt k0 đẩy alert)https://www.youtube.com/watch?v=KbtVCukpdw8
+	- Cài đặt và integrate wazuh với elk: Chính (https://kifarunix.com/integrate-wazuh-manager-with-elk-stack/), phụ(https://wazuh.com/blog/detection-with-elastic-stack-integration/)
 Lưu ý cài đặt elk và kibana phải cùng cả minorversion 
 Thuật ngữ:
 	- proof of concept: mang tính chất phát hiện
