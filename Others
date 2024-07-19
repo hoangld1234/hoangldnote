@@ -1,3 +1,28 @@
+successfactors for cmctel:
+	https://performancemanager10.successfactors.com/sf/start/  -> cmccorpora
+làm phê duyệt cài winscp, link down cisco switch, firewall: nd.son3, Vinh
+grep -A n: lọc và lấy n dòng dưới, -B n: lấy n dòng phía trên, -C n: lấy n dòng cả trên và dưới 
+Học quy định an toàn khối ITO:
+	- quy định attt: 
+		không mang tbi lưu trữ, k chia sẻ tt tk cá nhân, nghiêm cấm tải pm độc hại, hạn chế truy cập web k an toàn, chỉ sử dụng pm knox
+		block các hệ thống email public từ vdi
+		k chia sẻ source của ss trên public cloud
+		chỉ sử dụng ip tĩnh cung cấp từ sdsv, wireless chỉ nv của sdsv 
+		máy tính cài pm bảo mật nasca, escort, secureprint, antivirus
+	- quy định quản lý:
+		thay mk lần đầu, bảo mật tt trong khi dùng mail, thay đổi pass 1 thg/lần, sự cố thông báo cho sdsv, k gửi ra ngoài khi chưa đc phép, khi nhận email spam k clik
+		không dùng email truyền bá tt mật, đồi trụy, đăng ký diễn đàn chính trị tôn giáo, gửi thư nặc danh, k cho người khác mượn, k truy cập email ng khác
+	- quy định tuân thủ:
+		dán tem an ninh, cấm quay phim chụp ảnh, format máy trc khi ra văn phòng, hỗ trợ IT cần tạo ticket, đeo thẻ trong quá trình lv
+	- chế tài xử lý:
+		031-qđ xử phạt hành chính, bảo mật 007-qc
+		031: kl03-cho người khác mượn thẻ 1-45tr; phụ lục 3 lỗi vi phạm tại ito
+		một số chế tài xử phạt đg chú ý: 
+			5-10tr hoặc thôi việc: thiết bị sao chép tt, mang tl bảo mật ra khỏi, sử dụng email dự án đky chia sẻ lên mạng xh
+			1-4tr: đưa ng lạ vào, sử dụng dv lưu trữ bên ngoài
+			2tr hoạc thôi việc: tự phát tán virus
+			0,5-3tr: không xóa dl nhạy cảm
+			thôi việc: tiết lộ thông tin cá nhân, sao chép tt bảo mật, sản phẩm
 nic ring buffer: 4096 trong thư mục /etc/u.dev/ của ubuntu 22
 Database:
 	- Các mô hình database là base và acid để tương tác giữa transaction và database, acid phù hợp cho các loại db sql như maria, oracle, base phù hợp cho các loại db nonsql như redis, mongo
