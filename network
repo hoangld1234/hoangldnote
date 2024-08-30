@@ -45,9 +45,12 @@ Palo:
 		- Kiến trúc tập trung trong 1 FW chứ k chia ra manage và SGW như checkpoint
 		- Có virtual routers quản lý  
 	Nhược điểm:
+		- Ko tiện lợi như Fortinet trong việc cấu hình, vd như cấu hình policy k có tích NAT mà phải cấu hình NAT riêng
+		- khi khai báo policy ko bật được Nat mà phải khai báo riêng
+		- Tính license backdate
 	- SSL forward proxy: tính năng cho phép palo rà soát cert trên web https và cảnh báo user nếu cert đó k tin tưởng, ta sẽ tạo 1 cert đc trust trên fw được tạo ra từ 1 CA server local,
 	tạo 1 cert unstrust k cần sign bởi ca server, sau đó tạo profile ssl forward proxy và add vào 1 policy, khi kiểm tra cert web https ok palo sẽ gán trust cert vào, nếu k ok sẽ gán cert untrust và cảnh báo người dùng
 	- Virtual routers (VR) chính là 1 router ảo để cấu hình các route riêng, ta có thể tạo int loopback, cấu hình các giao thức routing tĩnh và động, kết nối với các VR khác.
 	- Một interface physic k thể add vào 2 virtual routers (VR), nhưng sub inter thì được.
 	- virtual wire: để khi đặt fw nằm giữa các kết nối mạng giữa switch có sẵn nó cho phép fw bình thg mà không phải cấu hình lại nhg vẫn kiểm soát được traffic
-	- Ko tiện lợi như Fortinet trong việc cấu hình, vd như cấu hình policy k có tích NAT mà phải cấu hình NAT riêng
+	
